@@ -9,6 +9,31 @@
    alt="lispy logo"/>
 </p>
 
+** This is a temporary fork **
+
+This is a temporary fork of: https://github.com/abo-abo/lispy
+
+Use as follows:
+
+```lisp
+(use-package lispy
+  :straight (lispy
+	     :type git
+	     :host github
+	     :repo "enzuru/lispy")
+  :ensure t
+  :hook ((emacs-lisp-mode . lispy-mode)
+         (ielm-mode . lispy-mode)
+         (lisp-mode . lispy-mode)
+         (lisp-interaction-mode . lispy-mode)
+         (geiser-repl-mode . lispy-mode)
+         (sly-mrepl-mode . lispy-mode)
+         (cider-repl-mode . lispy-mode)
+         (clojure-mode . lispy-mode)
+         (scheme-mode . lispy-mode)))
+
+```
+
 > short and sweet LISP editing
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
