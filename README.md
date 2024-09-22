@@ -13,6 +13,8 @@
 
 This is a temporary fork of: https://github.com/abo-abo/lispy
 
+I will maintain Lispy here until [abo-abo](https://github.com/abo-abo/) returns. Feel free to open up issues and submit pull requests. I have already ported over and merged some open PRs on the original Lispy repo.
+
 Use as follows:
 
 ```lisp
