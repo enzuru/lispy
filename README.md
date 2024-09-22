@@ -9,7 +9,7 @@
    alt="lispy logo"/>
 </p>
 
-** This is a temporary fork **
+## This is a temporary fork
 
 This is a temporary fork of: https://github.com/abo-abo/lispy
 
@@ -18,9 +18,9 @@ Use as follows:
 ```lisp
 (use-package lispy
   :straight (lispy
-	     :type git
-	     :host github
-	     :repo "enzuru/lispy")
+         :type git
+         :host github
+         :repo "enzuru/lispy")
   :ensure t
   :hook ((emacs-lisp-mode . lispy-mode)
          (ielm-mode . lispy-mode)
