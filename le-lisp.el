@@ -78,61 +78,30 @@
           (set-window-configuration wnd)
           conn))))
 
-(defun lispy--find-lisp-package (package-name)
-  "Return either a CL expression to find the given package, or if
-PACKAGE-NAME is nil the package we found in the Lisp buffer."
-  (let ((package-via-buffer
-         (upcase (string-replace
-                  "#:" ""
-                  (if (lispy--use-sly-p)
-                      (sly-current-package)
-                    (slime-current-package))))))
-    (if (null package-name)
-        package-via-buffer
-      ;; The package local nickname is either defined in our current package or
-      ;; from a different "home package". In case of the latter we can simply
-      ;; rely on `cl:define-package' to figure it out for us. Note that we use
-      ;; `cl:ignore-errors' for when a package either can't be found or might
-      ;; not have been loaded yet.
-      `(cl:or (cl:ignore-errors
-               (,(if (lispy--use-sly-p) 'slynk-backend:find-locally-nicknamed-package
-                   'swank/backend:find-locally-nicknamed-package)
-                ,(upcase package-name)
-                (cl:find-package ,package-via-buffer)))
-              (cl:find-package ,(upcase package-name))))))
-
 (defun lispy--lisp-args (symbol)
   "Return a pretty string with arguments for SYMBOL."
-  (if-let* ((lisp-arglist
-             (if (lispy--use-sly-p)
-                 (sly-eval
-                  `(slynk:operator-arglist
-                    ,(sly-cl-symbol-name symbol)
-                    ,(lispy--find-lisp-package (sly-cl-symbol-package symbol))))
-               (slime-eval
-                `(swank:operator-arglist
-                  ,(slime-cl-symbol-name symbol)
-                  ,(lispy--find-lisp-package (slime-cl-symbol-package symbol))))))
-            (args (list (mapconcat #'prin1-to-string (read lisp-arglist) " "))))
-      (let* ((symbol-package (if (lispy--use-sly-p) (sly-cl-symbol-package symbol)
-                               (slime-cl-symbol-package symbol)))
-             (package-prefixed-arglist (format "(%s:" symbol-package)))
-        ;; In Lisp, it is often the case we prefix low level packages with a `%'
-        ;; symbol. This is problematic in Elisp with `format'. For example, `%g'
-        ;; can have special meaning. We can eliminate this edge case by always
-        ;; concatenating.
-        (concat
-         (if symbol-package package-prefixed-arglist "(")
-         (format "%s"
-                 (mapconcat
-                  #'identity
-                  (mapcar (lambda (x)
-                            (propertize (downcase x)
-                                        'face 'lispy-face-req-nosel))
-                          args)
-                  (concat "\n" (make-string (+ 2 (length symbol)) ?\ ))))
-         ")"))
-    (format "Could not find symbol %s" (upcase symbol))))
+  (let ((args
+         (list
+          (mapconcat
+           #'prin1-to-string
+           (read (lispy--eval-lisp
+                  (format (if (lispy--use-sly-p)
+                              "(slynk-backend:arglist #'%s)"
+                            "(swank-backend:arglist #'%s)")
+                          symbol)))
+           " "))))
+    (if (listp args)
+        (format
+         "(%s %s)"
+         (propertize symbol 'face 'lispy-face-hint)
+         (mapconcat
+          #'identity
+          (mapcar (lambda (x) (propertize (downcase x)
+                                          'face 'lispy-face-req-nosel))
+                  args)
+          (concat "\n"
+                  (make-string (+ 2 (length symbol)) ?\ ))))
+      (propertize args 'face 'lispy-face-hint))))
 
 (defun lispy--lisp-describe (symbol)
   "Return documentation for SYMBOL."
