@@ -176,8 +176,9 @@ The caller of `lispy--show' might use a substitute e.g. `describe-function'."
 
             ((eq major-mode 'lisp-mode)
              (require 'le-lisp)
-             (setq lispy-hint-pos (point))
-             (lispy--show (lispy--lisp-args (lispy--current-function))))
+             (when-let ((sym (lispy--current-function)))
+               (setq lispy-hint-pos (point))
+               (lispy--show (lispy--lisp-args sym))))
 
             ((eq major-mode 'python-mode)
              (require 'le-python)
