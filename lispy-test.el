@@ -1866,6 +1866,29 @@ Insert KEY if there's no command."
   (should (equal
            (lispy--read "#m(foo bar)")
            '(ly-raw lisp-macro "#m(foo bar)")))
+  ;; Guix gexp
+  (cl-flet ((test-gexp (expected)
+              (let ((actual (lispy--read
+                             (with-temp-buffer
+                               (scheme-mode)
+                               (insert expected)
+                               (buffer-string))))
+                    (expected `(ly-raw lisp-macro ,expected)))
+                (should (equal actual expected)))))
+    ;; gexp
+    (test-gexp "#~a")
+    ;; ungexp
+    (test-gexp "#$a")
+    ;; ungexp
+    (test-gexp "#$a:b")
+    ;; ungexp-splicing
+    (test-gexp "#$@a")
+    ;; ungexp-native
+    (test-gexp "#+a")
+    ;; ungexp-native
+    (test-gexp "#+a:b")
+    ;; ungexp-native-splicing
+    (test-gexp "#+@a"))
   (should (equal
            (lispy--read ",(or body)")
            '(ly-raw \, (or body))))

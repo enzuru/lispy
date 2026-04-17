@@ -7325,6 +7325,26 @@ See https://clojure.org/guides/weird_characters#_character_literal.")
                                          beg (point))))
                       (delete-region beg (point))
                       (insert rep))))
+                ;; ——— Guix gexp (in Guile Scheme)
+                ;; Ref https://guix.gnu.org/manual/devel/en/html_node/G_002dExpressions.html#index-_0023_007eexp
+                ;; 
+                ;; This is a regular symbol, but as the result here is passed to
+                ;; `read', we have to use another construct.
+                ;; 
+                ;; Matches
+                ;; - gexp :: #~
+                ;; - ungexp :: #$
+                ;; - ungexp-splicing :: #$@
+                ;; - ungexp-native :: #+
+                ;; - ungexp-native-splicing #+@
+                (when (eq major-mode 'scheme-mode)
+                  (goto-char (point-min))
+                  (while (re-search-forward "\\(#~\\|#\\$\\|#\\$@\\|#+\\|#+@\\)" nil t)
+                    (unless (lispy--in-string-or-comment-p)
+                      (save-excursion
+                        (forward-sexp)
+                        (insert "\")"))
+                      (insert "(ly-raw lisp-macro \""))))
                 ;; ——— strings ————————————————
                 (goto-char (point-min))
                 (while (re-search-forward "\"" nil t)
