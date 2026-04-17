@@ -4228,7 +4228,7 @@ SYMBOL is a string."
   "The eval function may set this when there's output.")
 
 (declare-function cider--display-interactive-eval-result "ext:cider-overlays")
-(declare-function eros--eval-overlay "ext:eros")
+(declare-function eros-eval-overlay "ext:eros")
 (declare-function lispy--clojure-pretty-string "le-clojure")
 
 (define-error 'eval-error "Eval error")
@@ -4260,9 +4260,9 @@ When at an outline, eval the outline."
                           res (cdr (lispy--bounds-dwim)))
                         (cider--display-interactive-eval-result
                           res 'value (cdr (lispy--bounds-dwim)))))
-                     ((or (fboundp 'eros--eval-overlay)
+                     ((or (fboundp 'eros-eval-overlay)
                           (require 'eros nil t))
-                      (eros--eval-overlay
+                      (eros-eval-overlay
                        res (cdr (lispy--bounds-dwim))))
                      (t
                       (error "Please install CIDER >= 0.10 or eros to display overlay"))))))
