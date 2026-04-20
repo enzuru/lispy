@@ -4222,7 +4222,9 @@ SYMBOL is a string."
     (lisp-mode
      le-lisp lispy--eval-lisp)
     (hy-mode
-     le-hy lispy--eval-hy)))
+     le-hy lispy--eval-hy)
+    (janet-mode                         ;; janet-ts-mode?
+     le-janet lispy--eval-janet)))
 
 (defvar lispy-eval-output nil
   "The eval function may set this when there's output.")
