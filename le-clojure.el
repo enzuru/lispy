@@ -192,7 +192,7 @@ Add the standard output to the result."
                            (delete-dups
                             (append
                              cider-jack-in-dependencies
-                             (and (eq major-mode 'clojure-mode)
+                             (and (memq major-mode lispy-clojure-modes)
                                   lispy-cider-jack-in-dependencies)))))
                       (call-interactively lispy-cider-connect-method))
                     (format "Starting CIDER using %s ..." lispy-cider-connect-method)))))
@@ -608,20 +608,23 @@ Besides functions, handles specials, keywords, maps, vectors and sets."
          (format "(lispy.clojure/ctor-args %s)" symbol))))
 
 (defun lispy--clojure-pretty-string (str)
-  "Return STR fontified in `clojure-mode'."
+  "Return STR fontified in the current Clojure `major-mode'."
   (cond ((string-match "\\`\"error: \\([^\0]+\\)\"\\'" str)
          (concat (propertize "error: " 'face 'error)
                  (match-string 1 str)))
         ((> (length str) 4000)
          str)
         (t
-         (condition-case nil
-             (with-temp-buffer
-               (clojure-mode)
-               (insert str)
-               (lispy-font-lock-ensure)
-               (buffer-string))
-           (error str)))))
+         (let ((mode (if (memq major-mode lispy-clojure-modes)
+                         major-mode
+                       'clojure-mode)))
+           (condition-case nil
+               (with-temp-buffer
+                 (funcall mode)
+                 (insert str)
+                 (lispy-font-lock-ensure)
+                 (buffer-string))
+             (error str))))))
 
 (defun lispy-clojure-apropos-action (s)
   (cider-doc-lookup

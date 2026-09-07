@@ -503,7 +503,7 @@ backward through lists, which is useful to move into special.
                (setq-local lispy-outline "^\\(?:%\\*+\\|\\\\\\(?:sub\\)?section{\\)")
                (setq lispy-outline-header "%")
                (setq-local outline-regexp "\\(?:%\\*+\\|\\\\\\(?:sub\\)?section{\\)"))
-              ((eq major-mode 'clojure-mode)
+              ((memq major-mode lispy-clojure-modes)
                (eval-after-load 'le-clojure
                  '(setq completion-at-point-functions
                         '(lispy-clojure-complete-at-point
@@ -1818,6 +1818,12 @@ When this function is called:
     (clojure-mode . ("[`'~@]+" "#" "#\\?@?"))
     (clojurescript-mode . ("[`'~@]+" "#" "#\\?@?"))
     (clojurec-mode . ("[`'~@]+" "#" "#\\?@?"))
+    (clojure-ts-mode . ("[`'~@]+" "#" "#\\?@?"))
+    (clojure-ts-clojurescript-mode . ("[`'~@]+" "#" "#\\?@?"))
+    (clojure-ts-clojurec-mode . ("[`'~@]+" "#" "#\\?@?"))
+    (clojure-ts-clojuredart-mode . ("[`'~@]+" "#" "#\\?@?"))
+    (clojure-ts-jank-mode . ("[`'~@]+" "#" "#\\?@?"))
+    (clojure-ts-joker-mode . ("[`'~@]+" "#" "#\\?@?"))
     (cider-repl-mode . ("[`'~@]+" "#" "#\\?@?"))
     (cider-clojure-interaction-mode . ("[`'~@]+" "#" "#\\?@?"))
     (janet-mode . ("[@;]"))
@@ -1832,6 +1838,12 @@ major mode. These regexps are used to determine whether to insert a space for
   '((clojure-mode . ("[`']" "#[A-z.]*"))
     (clojurescript-mode . ("[`']" "#[A-z.]*"))
     (clojurec-mode . ("[`']" "#[A-z.]*"))
+    (clojure-ts-mode . ("[`']" "#[A-z.]*"))
+    (clojure-ts-clojurescript-mode . ("[`']" "#[A-z.]*"))
+    (clojure-ts-clojurec-mode . ("[`']" "#[A-z.]*"))
+    (clojure-ts-clojuredart-mode . ("[`']" "#[A-z.]*"))
+    (clojure-ts-jank-mode . ("[`']" "#[A-z.]*"))
+    (clojure-ts-joker-mode . ("[`']" "#[A-z.]*"))
     (cider-repl-mode . ("[`']" "#[A-z.]*"))
     (cider-clojure-interaction-mode . ("[`']" "#[A-z.]*"))
     (janet-mode . ("[@;]"))
@@ -1846,6 +1858,12 @@ major mode. These regexps are used to determine whether to insert a space for
   '((clojure-mode . ("[`'^]" "#[:]*[A-z.:]*"))
     (clojurescript-mode . ("[`'^]" "#[:]*[A-z.:]*"))
     (clojurec-mode . ("[`'^]" "#[:]*[A-z.:]*"))
+    (clojure-ts-mode . ("[`'^]" "#[:]*[A-z.:]*"))
+    (clojure-ts-clojurescript-mode . ("[`'^]" "#[:]*[A-z.:]*"))
+    (clojure-ts-clojurec-mode . ("[`'^]" "#[:]*[A-z.:]*"))
+    (clojure-ts-clojuredart-mode . ("[`'^]" "#[:]*[A-z.:]*"))
+    (clojure-ts-jank-mode . ("[`'^]" "#[:]*[A-z.:]*"))
+    (clojure-ts-joker-mode . ("[`'^]" "#[:]*[A-z.:]*"))
     (cider-repl-mode . ("[`'^]" "#[:]*[A-z.:]*"))
     (cider-clojure-interaction-mode . ("[`'^]" "#[:]*[A-z.:]*"))
     (janet-mode . ("[@;]"))
@@ -4123,6 +4141,9 @@ Sexp is obtained by exiting list ARG times."
 (defvar lispy-goto-symbol-alist
   '((clojure-mode lispy-goto-symbol-clojure le-clojure)
     (clojurescript-mode lispy-goto-symbol-clojurescript le-clojure)
+    (clojure-ts-mode lispy-goto-symbol-clojure le-clojure)
+    (clojure-ts-clojurescript-mode lispy-goto-symbol-clojurescript le-clojure)
+    (clojure-ts-clojurec-mode lispy-goto-symbol-clojure le-clojure)
     (scheme-mode lispy-goto-symbol-scheme le-scheme)
     (geiser-repl-mode lispy-goto-symbol-scheme le-scheme)
     (racket-mode lispy-goto-symbol-racket le-racket)
@@ -5722,7 +5743,7 @@ Second region and buffer are the current ones."
                            (goto-char ,pt)))
                        (top-level)))))
            (self-insert-command 1)))
-        ((eq major-mode 'clojure-mode)
+        ((memq major-mode lispy-clojure-modes)
          (lispy--clojure-debug-quit))))
 
 (declare-function cider-debug-defun-at-point "ext:cider-debug")
@@ -5738,7 +5759,7 @@ ARG is 4: `eval-defun' on the function from this sexp."
   (cond ((= arg 1)
          (cond ((memq major-mode lispy-elisp-modes)
                 (edebug-defun))
-               ((eq major-mode 'clojure-mode)
+               ((memq major-mode lispy-clojure-modes)
                 (cider-debug-defun-at-point))
                ((eq major-mode 'python-mode)
                 (lispy-python-set-breakpoint))
@@ -5827,7 +5848,7 @@ ARG is 4: `eval-defun' on the function from this sexp."
             (t
              (lispy-complain
               (format "%S isn't a function" ldsi-fun))))))
-        ((eq major-mode 'clojure-mode)
+        ((memq major-mode lispy-clojure-modes)
          (require 'le-clojure)
          (lispy--clojure-debug-step-in))
         ((eq major-mode 'python-mode)
@@ -7353,7 +7374,7 @@ See https://clojure.org/guides/weird_characters#_character_literal.")
                   (unless (lispy--in-string-or-comment-p)
                     (replace-match "(ly-raw empty)" nil nil nil 1)))
                 ;; ——— \ char syntax (Clojure)—
-                (when (eq major-mode 'clojure-mode)
+                (when (memq major-mode lispy-clojure-modes)
                   (lispy--read-replace lispy--clojure-char-literal-regex "clojure-char"))
                 ;; namespaced map #520
                 (when (memq major-mode lispy-clojure-modes)
@@ -7396,7 +7417,7 @@ See https://clojure.org/guides/weird_characters#_character_literal.")
                         (setq sexp (buffer-substring-no-properties pt (point)))
                         (delete-region (1- pt) (point))
                         (insert (format "(ly-raw char %S)" sexp)))))))
-                (when (eq major-mode 'clojure-mode)
+                (when (memq major-mode lispy-clojure-modes)
                   (lispy--read-replace " *,+" "clojure-commas"))
                 ;; ——— \ char syntax (LISP)————
                 (goto-char (point-min))
@@ -7628,6 +7649,7 @@ Defaults to `error'."
               (if (derived-mode-p
                    'emacs-lisp-mode
                    'clojure-mode
+                   'clojure-ts-mode
                    'lisp-mode
                    'scheme-mode)
                   (progn
@@ -8319,7 +8341,21 @@ The outer delimiters are stripped."
 
 (defvar geiser-active-implementations)
 (defvar clojure-align-forms-automatically)
+(defvar clojure-ts-align-forms-automatically)
 (declare-function clojure-align "ext:clojure-mode")
+(declare-function clojure-ts-align "ext:clojure-ts-mode")
+
+(defun lispy--clojure-align (beg end)
+  "Align the Clojure forms between BEG and END.
+Dispatch to `clojure-ts-align' or to `clojure-align', depending on
+`major-mode'.  Do nothing unless automatic alignment is enabled."
+  (if (memq major-mode lispy-clojure-ts-modes)
+      (when (and (bound-and-true-p clojure-ts-align-forms-automatically)
+                 (fboundp 'clojure-ts-align))
+        (clojure-ts-align beg end))
+    (when (and (bound-and-true-p clojure-align-forms-automatically)
+               (fboundp 'clojure-align))
+      (clojure-align beg end))))
 
 ;; TODO: Make me work with janet...
 (defun lispy--normalize-1 ()
@@ -8367,9 +8403,8 @@ The outer delimiters are stripped."
                  (insert new-str))
                (when was-left
                  (backward-list))))))
-    (when (and (memq major-mode lispy-clojure-modes)
-               clojure-align-forms-automatically)
-      (clojure-align (car bnd) (cdr bnd)))))
+    (when (memq major-mode lispy-clojure-modes)
+      (lispy--clojure-align (car bnd) (cdr bnd)))))
 
 (defun lispy--sexp-trim-leading-newlines (expr comment)
   "Trim leading (ly-raw newline) from EXPR.

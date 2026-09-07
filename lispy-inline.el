@@ -113,8 +113,17 @@ The caller of `lispy--show' might use a substitute e.g. `describe-function'."
                     suggest-mode)
   "Modes for which `lispy--eval-elisp' and related functions are appropriate.")
 
+(defvar lispy-clojure-ts-modes
+  '(clojure-ts-mode clojure-ts-clojurescript-mode clojure-ts-clojurec-mode
+                    clojure-ts-clojuredart-mode clojure-ts-jank-mode
+                    clojure-ts-joker-mode)
+  "Tree-sitter modes provided by `clojure-ts-mode'.")
+
 (defvar lispy-clojure-modes
-  '(clojure-mode clojurescript-mode clojurex-mode clojurec-mode)
+  '(clojure-mode clojurescript-mode clojurex-mode clojurec-mode
+                 clojure-ts-mode clojure-ts-clojurescript-mode
+                 clojure-ts-clojurec-mode clojure-ts-clojuredart-mode
+                 clojure-ts-jank-mode clojure-ts-joker-mode)
   "Modes for which clojure related functions are appropriate.")
 
 (defvar lispy-overlay nil
